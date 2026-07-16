@@ -57,6 +57,10 @@ const
             all
         };
     },
+    captionText = (caption) => (Array.isArray(caption) ? caption : [caption])
+        .map((cap) => cap?.caption ?? cap ?? null)
+        .filter((cap) => cap !== null)
+        .join(' '),
     clamp = (text, max) => {
         if (text.length <= max) {
             return text;
@@ -75,8 +79,7 @@ const
     appendMP3Meta = ({album, captions, generated = false, language, output, voice}) => {
         Object.keys(captions).forEach(async (id) => {
             const
-                caption = captions[id],
-                text = caption?.caption ?? caption,
+                text = captionText(captions[id]),
                 tags = {
                     album,
                     title: clamp(text, 40),
