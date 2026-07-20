@@ -174,7 +174,8 @@ const
         async afterExport (...args) {
             const
                 {album, encodedBy, config, transcripts, updateList} = this,
-                {files, output, language, voice} = config;
+                {files, output, language, voice} = config,
+                list = updateList ?? Object.keys(files).map((id) => `${id}.mp3`);
 
             appendMP3Meta({
                 album,
@@ -184,9 +185,9 @@ const
                 output,
                 voice
             });
-            for (let i = 0; i < updateList.length; i++) {
+            for (let i = 0; i < list.length; i++) {
                 const
-                    filename = updateList[i],
+                    filename = list[i],
                     id = filename.substring(0, filename.length - 4),
                     file = await getFileData(`${output}${filename}`, 'mp3');
 

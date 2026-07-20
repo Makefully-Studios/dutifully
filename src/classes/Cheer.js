@@ -187,34 +187,49 @@ const
                     concurrency: 1
                 }) : fs.createWriteStream(`${output}${instanceId}.zip`);
 
-            if (extract) {
-                dst.on('close', () => this.afterExport({instanceId}));
-            } else {
-                dst.on('finish', () => this.afterWrite({instanceId}));
-            }
-
-            try {
+            return new Promise(async (resolve, reject) => {
                 const
-                    archiveStream = await archive((archive) => this.beforeSend(archive)),
-                    data = await postStream(`${cleanPath(server)}/yap/${service}/${accessToken}`, archiveStream);
+                    finish = async (handler) => {
+                        try {
+                            await handler.call(this, {instanceId});
+                            resolve();
+                        } catch (e) {
+                            reject(e);
+                        }
+                    };
 
-                // listen for all archive data to be written
-                archiveStream.on('close', function () {
-                    console.log('completed send');
-                });
+                if (extract) {
+                    dst.on('close', () => finish(this.afterExport));
+                } else {
+                    dst.on('finish', () => finish(this.afterWrite));
+                }
+                dst.on('error', reject);
+
+                try {
+                    const
+                        archiveStream = await archive((archive) => this.beforeSend(archive)),
+                        data = await postStream(`${cleanPath(server)}/yap/${service}/${accessToken}`, archiveStream);
+
+                    // listen for all archive data to be written
+                    archiveStream.on('close', function () {
+                        console.log('completed send');
+                    });
+                
+                    data.on('error', function (err) {
+                        if (err.code === 'ECONNREFUSED') {
+                            console.warn(`Cannot connect to Cheerfully server "${server}"`);
+                            reject(err);
+                        } else {
+                            reject(err);
+                        }
+                    });
             
-                data.on('error', function (err) {
-                    if (err.code === 'ECONNREFUSED') {
-                        console.warn(`Cannot connect to Cheerfully server "${server}"`);
-                    } else {
-                        throw err;
-                    }
-                });
-        
-                data.pipe(dst);
-            } catch (e) {
-                console.warn(`Error handling "${instanceId}": ${e}`);
-            }
+                    data.pipe(dst);
+                } catch (e) {
+                    console.warn(`Error handling "${instanceId}": ${e}`);
+                    reject(e);
+                }
+            });
         }
 
         beforeSend (archive) {

@@ -38,7 +38,7 @@ const
         });
     };
 
-module.exports = async (cmdArgs) => {
+const cheer = async (cmdArgs) => {
     const
         package = await getJSON('./package.json') ?? {},
         config = await getJSON('./cheerfully.json') ?? {},
@@ -52,3 +52,7 @@ module.exports = async (cmdArgs) => {
         ...cmdArgs
     });
 };
+
+cheer.say = require('./say');
+
+module.exports = cheer;
