@@ -1,5 +1,5 @@
 {
-    "name": "cheerfully-client",
+    "name": "@makefully/dutifully",
     "version": "1.10.1",
     "description": "Client tools for Cheerfully service.",
     "main": "./src/index.js",
@@ -7,7 +7,14 @@
         "cheer": "./cheer.js",
         "say": "./say.js"
     },
-    "author": "Derek Detweiler <derek@makefullystudios.com>",
+    "files": [
+        "cheer.js",
+        "say.js",
+        "src",
+        "CHANGELOG.md",
+        "LICENSE",
+        "README.md"
+    ],
     "scripts": {
         "test-allosaurus": "node ./cheer.js -service allosaurus",
         "test-elevenlabs": "node ./cheer.js -service elevenlabs",
@@ -18,7 +25,36 @@
         "test-transcription": "node ./cheer.js -service transcription",
         "say": "node ./say.js"
     },
-    "license": "",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Makefully-Studios/dutifully.git"
+    },
+    "bugs": {
+        "url": "https://github.com/Makefully-Studios/dutifully/issues"
+    },
+    "homepage": "https://github.com/Makefully-Studios/dutifully#readme",
+    "keywords": [
+        "cheerfully",
+        "dutifully",
+        "tts",
+        "elevenlabs",
+        "polly",
+        "lipsync",
+        "transcription",
+        "captions"
+    ],
+    "author": "Derek Detweiler <derek@makefullystudios.com>",
+    "contributors": [
+        "Derek Detweiler <derek@makefullystudios.com>"
+    ],
+    "license": "MIT",
+    "publishConfig": {
+        "access": "public",
+        "provenance": true
+    },
+    "engines": {
+        "node": ">=18"
+    },
     "dependencies": {
         "archiver": "^4.0.1",
         "node-id3": "^0.2.6",

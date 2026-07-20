@@ -1,6 +1,10 @@
-# Cheerfully Client
+# Dutifully (`@makefully/dutifully`)
 
-This client service provides an API for interfacing with Cheerfully services. Cheerfully makes voice-over easy.
+Client API for Cheerfully services. Cheerfully makes voice-over easy.
+
+```bash
+npm install @makefully/dutifully
+```
 
 To use the API, you will need to specify a root `./env-cheerfully.json` file with the following format:
 
@@ -25,11 +29,11 @@ All services can be specified in `cheerfully.json` as described in the following
 }
 ```
 
-Alternatively, services can be run from Node by including the Cheerfully Client as shown:
+Alternatively, services can be run from Node by including Dutifully as shown:
 
 ```javascript
 const
-    cheerfully = require('cheerfully-client');
+    cheerfully = require('@makefully/dutifully');
 
 cheerfully({
     service: 'polly'
@@ -53,10 +57,11 @@ Or programmatically:
 
 ```javascript
 const
-    cheerfully = require('cheerfully-client');
+    cheerfully = require('@makefully/dutifully');
 
 await cheerfully.say('The build is complete');
 ```
+
 
 Voice settings come from the first `elevenlabs` entry in `cheerfully.json` (same as other ElevenLabs chores). Server credentials and `elevenLabsApiKey` come from `env-cheerfully.json`. Cached files are keyed by voice + text, so repeats play immediately without regenerating.
 
@@ -203,3 +208,7 @@ If your scripts include any phrases that should remain unbroken by the captionin
 Find an example script in the `./examples/` folder. You can run either `npm run test-elevenlabs` or `npm run test-polly` to create VO tracks in the examples folder that you can then use to try out `npm run test-rhubarb` and `npm run test-transcription`.
 
 These examples are specified using a JSON definition in `./cheerfully.json` which you can copy or modify to set different generation parameters as supported by Cheerfully.
+
+---
+
+Maintainers: see [PUBLISHING.md](PUBLISHING.md) for npm trusted publishing setup.
