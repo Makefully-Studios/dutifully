@@ -1,6 +1,6 @@
 const
-    fs = require('fs').promises,
     getFileData = require("./getFileData"),
+    {readdirOrEmpty} = require("./dirs"),
     filter = (fileType, file) => (file.indexOf('.') !== 0) && (file.slice(-(fileType.length + 1)) === `.${fileType}`);
 
 module.exports = async (path, fileType) => {
@@ -9,10 +9,10 @@ module.exports = async (path, fileType) => {
     if (fileType.toLowerCase() === 'json') {
         const
             file = await getFileData(`${path}captions.json`, 'json'),
-            {data: json} = file;
+            {data: json = {}} = file;
 
         return {
-            captions: Object.keys(json).reduce((obj, key) => {
+            captions: Object.keys(json ?? {}).reduce((obj, key) => {
                 obj[key] = json[key].map(({content}) => content).join(' ');
                 return obj;
             }, {}),
@@ -21,7 +21,7 @@ module.exports = async (path, fileType) => {
         };
     } else { // Otherwise we pull all the files and construct a key/value object.
         const
-            files = (await fs.readdir(path)).filter(filter.bind(null, fileType)),
+            files = (await readdirOrEmpty(path)).filter(filter.bind(null, fileType)),
             captions = {},
             fileMap = {};
             

@@ -2,11 +2,12 @@ const
     Cheer = require('./Cheer'),
     fs = require('fs').promises,
     getJSON = require('../helpers/getJSON'),
+    {ensureDir, ensureParentDir, readdirOrEmpty} = require('../helpers/dirs'),
     id3 = require('node-id3').Promise,
     filter = (fileType, file) => (file.indexOf('.') !== 0) && (file.slice(-(fileType.length + 1)) === `.${fileType}`),
     combine = async (path, fileType) => {
         const
-            files = (await fs.readdir(path)).filter(filter.bind(null, fileType)),
+            files = (await readdirOrEmpty(path)).filter(filter.bind(null, fileType)),
             list = [];
         
         for (let i = 0; i < files.length; i++) {
@@ -56,7 +57,13 @@ const
                 {config} = this,
                 {files = {}, options = {}, output, src} = config,
                 {exportFormat = 'json', output: outputType = 'json'} = options,
-                file = 'mouthCues.json',
+                file = 'mouthCues.json';
+
+            if (output) {
+                await ensureDir(output);
+            }
+
+            const
                 raw = outputType === 'json' && exportFormat !== 'mp3' ? await getJSON(`${output}${file}`) ?? {} : null,
                 alreadyLipSynced = raw ? Object.keys(raw) : await combine(output, exportFormat),
                 check = (id) => {
@@ -83,6 +90,7 @@ const
                         console.log(`Removed "${key}"`);
                     }
                     if (raw) {
+                        await ensureParentDir(`${output}${file}`);
                         await fs.writeFile(`${output}${file}`, JSON.stringify(sortKeys({
                             ...raw,
                             ...newLipSync ? await getJSON(`${output}${file}`) ?? {} : {} // get new version.
@@ -91,7 +99,7 @@ const
 
                     return alreadyLipSynced.length;
                 },
-                list = (await fs.readdir(src)).filter(filter.bind(null, 'mp3')).filter((file) => !check(file.substring(0, file.length - 4)));
+                list = (await readdirOrEmpty(src)).filter(filter.bind(null, 'mp3')).filter((file) => !check(file.substring(0, file.length - 4)));
 
             this.differenceOnly = true;
 

@@ -2,6 +2,7 @@ const
     crypto = require('crypto'),
     fs = require('fs').promises,
     File = require("./File"),
+    {ensureParentDir} = require('../helpers/dirs'),
     getJSON = require('../helpers/getJSON'),
     sortKeys = (obj) => Object.keys(obj).sort().reduce((s, key) => {
         s[key] = obj[key];
@@ -11,7 +12,7 @@ const
 module.exports = class JSONFile extends File {
     async load (path) {
         await super.load(path);
-        this.data = await getJSON(path);
+        this.data = await getJSON(path) ?? {};
         return this.data;
     }
 
@@ -34,7 +35,8 @@ module.exports = class JSONFile extends File {
         });
     }
 
-    save () { // return a promise
+    async save () { // return a promise
+        await ensureParentDir(this.path);
         return fs.writeFile(`${this.path}`, JSON.stringify(this.data, null, 4));
     }
 }

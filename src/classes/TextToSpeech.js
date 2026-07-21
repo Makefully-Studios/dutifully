@@ -3,6 +3,7 @@ const
     Transcript = require('./Transcript'),
     fs = require('fs').promises,
     getFileData = require('../helpers/getFileData'),
+    {ensureDir, readdirOrEmpty} = require('../helpers/dirs'),
     id3 = require('node-id3').Promise,
     isoLanguageMap = {
         'en-US': 'eng',
@@ -11,7 +12,7 @@ const
     matches = (file, types) => types.reduce((prev, current) => prev || (file.slice(-(current.length + 1)) === `.${current}`), false),
     getMP3s = async ({encodedBy = '', output = './', fileTypes = [], transcripts}) => {
         const
-            all = (await fs.readdir(output))
+            all = (await readdirOrEmpty(output))
                 .filter((file) => (file.indexOf('.') !== 0) && (fileTypes.length === 0 || matches(file, fileTypes)));
 
         if (transcripts) {
@@ -76,7 +77,11 @@ const
             }
         }
     },
-    appendMP3Meta = ({album, captions, generated = false, language, output, voice}) => {
+    appendMP3Meta = async ({album, captions, generated = false, language, output, voice}) => {
+        if (output) {
+            await ensureDir(output);
+        }
+
         Object.keys(captions).forEach(async (id) => {
             const
                 text = captionText(captions[id]),
@@ -140,7 +145,13 @@ const
         async checkDifference () {
             const
                 {album, config, encodedBy = '', transcripts} = this,
-                {output, files = {}, language, updateAllMetaData = false} = config,
+                {output, files = {}, language, updateAllMetaData = false} = config;
+
+            if (output) {
+                await ensureDir(output);
+            }
+
+            const
                 {missing, present, unlisted} = await getMP3s({
                     encodedBy,
                     fileTypes: ['mp3'],

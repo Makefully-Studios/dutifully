@@ -1,5 +1,6 @@
 const
     fs = require('fs').promises,
+    {ensureParentDir} = require('../helpers/dirs'),
     File = class {
         constructor ({fileType}) {
             this.data = null;
@@ -15,7 +16,8 @@ const
             return null; // does not support hashes.
         }
 
-        save () { // return a promise
+        async save () { // return a promise
+            await ensureParentDir(this.path);
             return fs.writeFile(`${this.path}`, this.data ?? '');
         }
 

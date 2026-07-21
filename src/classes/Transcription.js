@@ -5,6 +5,7 @@ const
     getCaptions = require('../helpers/getCaptions'),
     getFileData = require('../helpers/getFileData'),
     getJSON = require('../helpers/getJSON'),
+    {ensureDir, readdirOrEmpty} = require('../helpers/dirs'),
     SEPARATE_CHARACTER = '|',
     JOIN_CHARACTER = '^',
     filter = (fileType, file) => (file.indexOf('.') !== 0) && (file.slice(-(fileType.length + 1)) === `.${fileType}`),
@@ -44,7 +45,13 @@ const
             const
                 {config} = this,
                 {files, format = 'json', output, src} = config,
-                fileType = format.toLowerCase(),
+                fileType = format.toLowerCase();
+
+            if (output) {
+                await ensureDir(output);
+            }
+
+            const
                 {captions: alreadyCaptioned, file: captionsFile, files: fileMap} = await getCaptions(output, fileType),
                 check = (id, caption) => {
                     const
@@ -99,7 +106,7 @@ const
     
                     return olds.length;
                 },
-                list = (await fs.readdir(src)).filter(filter.bind(null, 'mp3')).filter((file) => {
+                list = (await readdirOrEmpty(src)).filter(filter.bind(null, 'mp3')).filter((file) => {
                     const
                         id = file.substring(0, file.length - 4),
                         caption = files?.[id];

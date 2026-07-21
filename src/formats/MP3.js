@@ -1,6 +1,7 @@
 const
     id3 = require('node-id3').Promise,
-    File = require("./File");
+    File = require("./File"),
+    {ensureParentDir} = require('../helpers/dirs');
 
 module.exports = class MP3 extends File {
     async load (path) {
@@ -31,7 +32,8 @@ module.exports = class MP3 extends File {
         return null;
     }
 
-    save () { // return a promise
+    async save () { // return a promise
+        await ensureParentDir(this.path);
         return id3.write(this.data, this.path);
     }
 
