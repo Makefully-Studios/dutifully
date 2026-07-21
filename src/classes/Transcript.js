@@ -41,9 +41,13 @@ const
                 }
 
                 const
-                    {caption, speaker, voice} = line,
+                    {caption, class: lineClass, speaker, voice} = line,
                     resolvedVoice = voice ?? (voiceOrVoiceMap ? resolveVoice(voiceOrVoiceMap, speaker) : null),
                     result = {caption};
+
+                if (lineClass) {
+                    result.class = lineClass;
+                }
 
                 if (speaker) {
                     result.speaker = speaker;

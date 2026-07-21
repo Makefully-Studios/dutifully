@@ -203,6 +203,8 @@ Specify `limit` to set the maximum number of characters for a single caption lin
 
 If your scripts include any phrases that should remain unbroken by the captioning process, add them to the `nowrap` list. For example: `"nowrap": ["Makefully Studios"]`.
 
+Script lines may include an optional `class` (for example `"title"` or `"stage"`). In VTT exports this becomes a cue class span (`<c.title>…</c>`). In SAMI/SMI the paragraph `Class` is the job language plus `CC` (for example `ENUSCC` for `en-US`); when a speaker and/or script `class` is present, the dialog is wrapped in `<SPAN Class="…">` (for example `Class="todd stage"`). In JSON exports it is included on each caption entry. SRT, LRC, and MP3 SYLT ignore it.
+
 ## Example
 
 Find an example script in the `./examples/` folder. You can run either `npm run test-elevenlabs` or `npm run test-polly` to create VO tracks in the examples folder that you can then use to try out `npm run test-rhubarb` and `npm run test-transcription`.
