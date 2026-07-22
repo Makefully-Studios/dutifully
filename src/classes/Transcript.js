@@ -41,7 +41,7 @@ const
                 }
 
                 const
-                    {caption, class: lineClass, speaker, voice} = line,
+                    {caption, class: lineClass, speaker, voice, events} = line,
                     resolvedVoice = voice ?? (voiceOrVoiceMap ? resolveVoice(voiceOrVoiceMap, speaker) : null),
                     result = {caption};
 
@@ -51,6 +51,10 @@ const
 
                 if (speaker) {
                     result.speaker = speaker;
+                }
+
+                if (events) {
+                    result.events = events;
                 }
 
                 if (resolvedVoice) {

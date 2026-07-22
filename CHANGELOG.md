@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.12.1
+
+- Preserve optional script-line `events` through Transcript for timed marker definitions.
+
 ## 1.12.0
 
 - Treat missing `src`/`output` directories as empty instead of failing; create output directories when writing.

@@ -205,6 +205,14 @@ If your scripts include any phrases that should remain unbroken by the captionin
 
 Script lines may include an optional `class` (for example `"title"` or `"stage"`). In VTT exports this becomes a cue class span (`<c.title>…</c>`). In SAMI/SMI the paragraph `Class` is the job language plus `CC` (for example `ENUSCC` for `en-US`); when a speaker and/or script `class` is present, the dialog is wrapped in `<SPAN Class="…">` (for example `Class="todd stage"`). In JSON exports it is included on each caption entry. SRT, LRC, and MP3 SYLT ignore it.
 
+Script lines may also include an optional `events` array for one-shot timed markers. Entries may be:
+
+* a **number** — add to the running absolute time offset (ms)
+* a **string** `"<phrase"` / `">phrase"` — set the offset to just before/after that phrase in the caption; any other string fires that event at the current offset
+* an **object** `{ "event", "time"?, "before"?, "after"? }` — fires `event`; optional fields set the absolute offset (`time` wins over `before` over `after`)
+
+Cheerfully resolves these against caption timings and exports them in parallel using the same caption `format` (`events.json`, `{id}.events.vtt` / `.srt` / `.sami` / `.smi` / `.lrc`, or a separate MP3 SYLT frame with content type `EVENTS` labeled `"events"`).
+
 ## Example
 
 Find an example script in the `./examples/` folder. You can run either `npm run test-elevenlabs` or `npm run test-polly` to create VO tracks in the examples folder that you can then use to try out `npm run test-rhubarb` and `npm run test-transcription`.
