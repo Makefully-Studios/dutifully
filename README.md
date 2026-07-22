@@ -40,7 +40,7 @@ cheerfully({
 });
 ```
 
-## Say (spoken notifications)
+### Say (spoken notifications)
 
 `say` generates short spoken phrases through Cheerfully's ElevenLabs service, caches the audio under `.cache/tts/`, and plays it locally via `node-web-audio-api`. Use it from npm scripts instead of wiring ElevenLabs into the consuming project:
 
@@ -108,6 +108,51 @@ This audio file process accepts ffmpeg commandline arguments to perform operatio
     }]
 }
 ```
+
+### Packfully
+
+This image-to-atlas service packs PNG/JPG/WebP sprites into texture atlases and downloads atlas PNG(s) plus descriptor file(s).
+
+```javascript
+{
+    "packfully": [{
+        "format": "texturepacker",
+        "src": "./example/sprites/",
+        "output": "./example/atlases/",
+        "options": {
+            "maxWidth": 2048,
+            "maxHeight": 2048,
+            "pot": true,
+            "smart": true,
+            "square": false,
+            "padding": 1,
+            "extrude": 1,
+            "border": 1,
+            "allowRotation": false,
+            "trim": true,
+            "trimThreshold": 0,
+            "prefix": "packed",
+            "scale": 1
+        },
+        "files": {
+            "hero.png": { "trim": false }
+        }
+    }]
+}
+```
+
+Use `exports: ["texturepacker", "createjs"]` (or `format`) to choose one or more atlas descriptors. Supported formats:
+
+* `texturepacker` / `json-hash` / `pixi` / `phaser-hash` — TexturePacker JSON Hash
+* `json-array` / `phaser-array` — TexturePacker JSON Array
+* `createjs` / `easeljs` — CreateJS SpriteSheet JSON
+* `spine` — Spine `.atlas` text
+* `css` — CSS sprite classes
+* `starling` / `sparrow` — Starling/Sparrow XML
+* `unity` — Unity-oriented JSON
+* `godot` — Godot atlas JSON
+
+Spacing: `padding` is empty gap beyond `extrude`; `extrude` is edge-pixel bleed into that gap; `border` is margin from the atlas edge.
 
 ### Polly
 
@@ -215,7 +260,7 @@ Cheerfully resolves these against caption timings and exports them in parallel u
 
 ## Example
 
-Find an example script in the `./examples/` folder. You can run either `npm run test-elevenlabs` or `npm run test-polly` to create VO tracks in the examples folder that you can then use to try out `npm run test-rhubarb` and `npm run test-transcription`.
+Find an example script in the `./examples/` folder. You can run either `npm run test-elevenlabs` or `npm run test-polly` to create VO tracks in the examples folder that you can then use to try out `npm run test-rhubarb` and `npm run test-transcription`. Sample sprites for atlas packing are under `./example/sprites/`; run `npm run test-packfully` to pack them into `./example/atlases/`.
 
 These examples are specified using a JSON definition in `./cheerfully.json` which you can copy or modify to set different generation parameters as supported by Cheerfully.
 

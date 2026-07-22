@@ -1,6 +1,6 @@
 {
     "name": "@makefully/dutifully",
-    "version": "1.12.1",
+    "version": "1.13.0",
     "description": "Client tools for Cheerfully service.",
     "main": "./src/index.js",
     "bin": {
@@ -19,6 +19,7 @@
         "test-allosaurus": "node ./cheer.js -service allosaurus",
         "test-elevenlabs": "node ./cheer.js -service elevenlabs",
         "test-ffmpeg": "node ./cheer.js -service ffmpeg",
+        "test-packfully": "node ./cheer.js -service packfully",
         "test-polly": "node ./cheer.js -service polly",
         "test-rasterize": "node ./cheer.js -service rasterize",
         "test-rhubarb": "node ./cheer.js -service rhubarb",
@@ -41,7 +42,10 @@
         "polly",
         "lipsync",
         "transcription",
-        "captions"
+        "captions",
+        "packfully",
+        "atlas",
+        "spritesheet"
     ],
     "author": "Derek Detweiler <derek@makefullystudios.com>",
     "contributors": [

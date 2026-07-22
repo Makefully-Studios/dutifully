@@ -68,6 +68,36 @@
         "src": "./example/vo/en/",
         "output": "./example/vo/en/"
     }],
+    "packfully": [{
+        "format": "texturepacker",
+        "src": "./example/sprites/",
+        "output": "./example/atlases/",
+        "options": {
+            "maxWidth": 512,
+            "maxHeight": 512,
+            "pot": true,
+            "smart": true,
+            "padding": 1,
+            "extrude": 1,
+            "border": 1,
+            "trim": true,
+            "allowRotation": false,
+            "prefix": "packed"
+        }
+    }, {
+        "exports": ["texturepacker", "createjs"],
+        "src": "./example/sprites/",
+        "output": "./example/atlases/",
+        "options": {
+            "maxWidth": 512,
+            "maxHeight": 512,
+            "pot": true,
+            "smart": true,
+            "padding": 2,
+            "extrude": 1,
+            "prefix": "multi"
+        }
+    }],
     "rasterize": [{
         "src": "./example/images/",
         "output": "./example/images/"

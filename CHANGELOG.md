@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.13.0
+
+- Add `packfully` service client for packing images into texture atlases.
+
 ## 1.12.1
 
 - Preserve optional script-line `events` through Transcript for timed marker definitions.

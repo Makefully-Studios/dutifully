@@ -6,6 +6,7 @@ const
         allosaurus: LipSync,
         elevenlabs: require('./classes/ElevenLabs'),
         ffmpeg: require('./classes/FFMPEG'),
+        packfully: require('./classes/Packfully'),
         polly: require('./classes/Polly'),
         rasterize: require('./classes/Rasterize'),
         rhubarb: LipSync,
