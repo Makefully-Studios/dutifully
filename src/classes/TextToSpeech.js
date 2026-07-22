@@ -82,8 +82,12 @@ const
             await ensureDir(output);
         }
 
-        Object.keys(captions).forEach(async (id) => {
+        const
+            ids = Object.keys(captions);
+
+        for (let i = 0; i < ids.length; i++) {
             const
+                id = ids[i],
                 text = captionText(captions[id]),
                 tags = {
                     album,
@@ -95,13 +99,13 @@ const
                 };
 
             await id3.update(tags, `${output}${id}.mp3`);
-            
+
             if (generated) {
                 console.log(`Voice generated for "${id}".`);
             } else {
                 console.log(`Voice meta data updated for "${id}".`);
             }
-        });
+        }
     },
     mapReduction = (map, list) => list.reduce((obj, file) => {
         const
@@ -167,7 +171,7 @@ const
             }
     
             if (updateAllMetaData && present.length) {
-                appendMP3Meta({
+                await appendMP3Meta({
                     album,
                     captions: mapReduction(files, present),
                     language,
@@ -186,9 +190,39 @@ const
             const
                 {album, encodedBy, config, transcripts, updateList} = this,
                 {files, output, language, voice} = config,
-                list = updateList ?? Object.keys(files).map((id) => `${id}.mp3`);
+                list = updateList ?? Object.keys(files).map((id) => `${id}.mp3`),
+                missing = [];
 
-            appendMP3Meta({
+            for (let i = 0; i < list.length; i++) {
+                const
+                    filename = list[i],
+                    fullPath = `${output}${filename}`;
+
+                try {
+                    await fs.access(fullPath);
+                } catch (e) {
+                    missing.push(filename);
+                }
+            }
+
+            if (missing.length) {
+                let detail = '';
+
+                try {
+                    const
+                        log = JSON.parse(await fs.readFile(`${output}log.json`, 'utf8'));
+
+                    if (log?.errors?.length) {
+                        detail = ` Server errors: ${log.errors.join('; ')}`;
+                    }
+                } catch (e) { /* no log.json */ }
+
+                throw new Error(
+                    `Voice export missing ${missing.length === 1 ? `"${missing[0]}"` : `${missing.length} files (${missing.join(', ')})`}.${detail}`
+                );
+            }
+
+            await appendMP3Meta({
                 album,
                 captions: files,
                 generated: true,

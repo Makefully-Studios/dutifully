@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.13.1
+
+- Harden `say` / ElevenLabs export when the result zip has no MP3 (clearer error, no unhandled ENOENT from ID3 metadata).
+
 ## 1.13.0
 
 - Add `packfully` service client for packing images into texture atlases.

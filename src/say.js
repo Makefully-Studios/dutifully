@@ -59,17 +59,20 @@ const
                 },
                 path: '',
                 voice,
-                output
+                output,
+                extract: true
             },
             handler = new ElevenLabs({
                 config,
                 contents: {
                     ...contents,
-                    service: 'elevenlabs'
+                    service: 'elevenlabs',
+                    extract: true
                 }
             });
 
         delete config.script;
+        delete config.src;
 
         await handler.prepare({
             difference: false,
@@ -79,7 +82,30 @@ const
             instanceId: `${contents.id}-say`
         });
 
-        return path.join(CACHE_DIR, `${key}.mp3`);
+        const
+            mp3File = path.join(CACHE_DIR, `${key}.mp3`);
+
+        try {
+            await fsp.access(mp3File);
+        } catch (e) {
+            let detail = '';
+
+            try {
+                const
+                    log = JSON.parse(await fsp.readFile(path.join(CACHE_DIR, 'log.json'), 'utf8'));
+
+                if (log?.errors?.length) {
+                    detail = ` ${log.errors.join('; ')}`;
+                }
+            } catch (err) { /* ignore */ }
+
+            throw new Error(
+                `Speech generation finished but "${mp3File}" was not created.${detail} ` +
+                'Check that the Cheerfully worker is running and picking up elevenlabs chores.'
+            );
+        }
+
+        return mp3File;
     };
 
 module.exports = async (textOrArgs = {}) => {
