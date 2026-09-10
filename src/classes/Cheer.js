@@ -65,34 +65,80 @@ const
                                 let response = null;
 
                                 try {
-                                    response = await fetchStream(`${url}/${choreId}`, headers);
+                                    response = await fetchStream(`${url}/${choreId}/status`, headers);
                                 } catch (e) {
-                                    console.warn(e);
-
-                                    setTimeout(checkStatus, 10000);
-                                    return;
+                                    try {
+                                        response = await fetchStream(`${url}/${choreId}`, headers);
+                                    } catch (e2) {
+                                        console.warn(e2);
+                                        setTimeout(checkStatus, 10000);
+                                        return;
+                                    }
                                 }
 
                                 if (response.json) {
-                                    if (response.json.errors) {
+                                    if (response.json.errors && response.json.state === 'error') {
                                         const
                                             list = Array.isArray(response.json.errors)
                                                 ? response.json.errors
                                                 : [response.json.errors];
 
                                         reject(new Error(list.join('; ')));
-                                    } else if (response.json.status) {
-                                        shareStatus(response.json.status);
-                                        setTimeout(checkStatus, 10000);
-                                    } else {
-                                        shareStatus(response.json);
-                                        setTimeout(checkStatus, 10000);
+                                        return;
                                     }
-                                } else {
+
+                                    if (response.json.state === 'complete') {
+                                        try {
+                                            const zip = await fetchStream(`${url}/${choreId}`, headers);
+
+                                            if (zip.stream) {
+                                                resolve(zip.stream);
+                                                return;
+                                            }
+                                        } catch (e) {
+                                            console.warn(e);
+                                        }
+                                        setTimeout(checkStatus, 5000);
+                                        return;
+                                    }
+
+                                    if (response.json.status) {
+                                        shareStatus(response.json.status);
+                                    } else if (response.json.state) {
+                                        shareStatus(response.json.state);
+                                    }
+
+                                    if (response.json.state === 'pending') {
+                                        try {
+                                            const logs = await fetchStream(
+                                                `${url}/${choreId}/logs?after=${logAfter}`,
+                                                headers
+                                            );
+
+                                            if (logs.json?.lines?.length) {
+                                                logs.json.lines.forEach((line) => {
+                                                    const text = line?.message || JSON.stringify(line);
+
+                                                    if (text && text !== lastLog) {
+                                                        console.log(text);
+                                                        lastLog = text;
+                                                    }
+                                                });
+                                                logAfter = logs.json.after || logAfter;
+                                            }
+                                        } catch (e) {}
+                                    }
+
+                                    setTimeout(checkStatus, 10000);
+                                } else if (response.stream) {
                                     resolve(response.stream);
+                                } else {
+                                    setTimeout(checkStatus, 10000);
                                 }
                             };
-                        let lastStatus = '';
+                        let lastStatus = '',
+                            lastLog = '',
+                            logAfter = 0;
 
                         checkStatus();
                     } else {

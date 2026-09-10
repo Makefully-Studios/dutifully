@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 1.21.2
+
+- Yap poll uses `/status` then download; while pending, tails `/logs` for live Cheerfully worker output.
+
 ## 1.21.1
 
 - Bump `unzip-stream` to ^0.3.2 (fixes zip-slip arbitrary file write, GHSA-6jrj-vc65-c983).
