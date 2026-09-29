@@ -17,15 +17,19 @@ const
         translate: require('./classes/Translate')
     },
     getJSON = require('./helpers/getJSON'),
+    {normalizeOnly, filterJobsById} = require('./helpers/filterJobs'),
     send = async function (contents) {
         const
             {id, service} = contents,
-            configs = Array.isArray(contents[service]) ? contents[service] : [contents[service]];
+            configs = Array.isArray(contents[service]) ? contents[service] : [contents[service]],
+            onlyIds = normalizeOnly(contents.only),
+            {jobs, indices} = filterJobsById(configs, onlyIds),
+            {length} = configs;
 
-        for (let index = 0; index < configs.length; index++) {
+        for (let i = 0; i < jobs.length; i++) {
             const
-                config = configs[index],
-                {length} = configs;
+                config = jobs[i],
+                index = indices[i];
 
             if (!config) {
                 console.warn(`Empty configuration for "${service}" service.`);
@@ -58,7 +62,7 @@ const cheer = async (cmdArgs) => {
         config = await getJSON('./cheerfully.json') ?? {},
         env = await getJSON('./env-cheerfully.json') ?? {};
 
-    send({
+    await send({
         id: `${package.name}-${package.version}`,
         package,
         ...config,

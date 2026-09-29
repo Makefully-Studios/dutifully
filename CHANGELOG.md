@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 1.22.0
+
+- Select a subset of service listings via optional job `id` and top-level `only` (`cheer -service packfully -only heroes,ui`).
+
 ## 1.21.2
 
 - Yap poll uses `/status` then download; while pending, tails `/logs` for live Cheerfully worker output.

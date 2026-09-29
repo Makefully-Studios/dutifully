@@ -74,6 +74,7 @@
         "output": "./example/vo/en/"
     }],
     "packfully": [{
+        "id": "packed",
         "format": "texturepacker",
         "src": "./example/sprites/",
         "output": "./example/atlases/",
@@ -90,6 +91,7 @@
             "prefix": "packed"
         }
     }, {
+        "id": "multi",
         "exports": ["texturepacker", "createjs"],
         "src": "./example/sprites/",
         "output": "./example/atlases/",

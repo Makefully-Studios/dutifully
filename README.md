@@ -42,6 +42,41 @@ cheerfully({
 });
 ```
 
+### Selecting listings (`id` + `only`)
+
+Each service entry in `cheerfully.json` is an array of jobs (listings). Give any job an optional `id` string (unique within that service) to target it without running the whole array:
+
+```javascript
+{
+    "packfully": [{
+        "id": "heroes",
+        "src": "./sprites/heroes/",
+        "output": "./atlases/",
+        "options": { "prefix": "heroes" }
+    }, {
+        "id": "ui",
+        "src": "./sprites/ui/",
+        "output": "./atlases/",
+        "options": { "prefix": "ui" }
+    }]
+}
+```
+
+Then run a subset from the CLI or from Node:
+
+```bash
+cheer -service packfully -only heroes,ui
+```
+
+```javascript
+cheerfully({
+    service: 'packfully',
+    only: ['heroes', 'ui']   // or only: 'heroes,ui'
+});
+```
+
+Omit `only` to run every listing for that service (unchanged). Jobs without an `id` still run in that case; they cannot be selected when `only` is set. Unknown or duplicate ids fail with a clear error. Per-job difference skipping still applies to whichever listings you select. The `id` field is for client selection; Cheerfully ignores it on the server.
+
 ### Say (spoken notifications)
 
 `say` generates short spoken phrases through Cheerfully's ElevenLabs service, caches the audio under `.cache/tts/`, and plays it locally via `node-web-audio-api`. Use it from npm scripts instead of wiring ElevenLabs into the consuming project:
@@ -118,6 +153,7 @@ This image-to-atlas service packs PNG/JPG/WebP sprites into texture atlases and 
 ```javascript
 {
     "packfully": [{
+        "id": "packed",
         "format": "texturepacker",
         "src": "./example/sprites/",
         "output": "./example/atlases/",
