@@ -4,14 +4,11 @@ const
 module.exports = class ElevenLabs extends TextToSpeech {
     constructor (data) {
         const
-            {id, elevenLabsApiKey} = data.contents;
+            {id} = data.contents;
 
         data.album = id;
         data.encodedBy = 'ElevenLabs';
-        if (elevenLabsApiKey) {
-            data.config.apiKey = elevenLabsApiKey;
-        }
-
+        // Auth (env auth.elevenlabs / elevenLabsApiKey / job.auth) is applied in Cheer.
         super(data);
     }
 };

@@ -6,6 +6,7 @@ const
     https = require('https'),
     {PassThrough} = require('stream'),
     unzipper = require('unzip-stream'),
+    {applyServiceAuth} = require('../helpers/applyServiceAuth'),
     cleanPath = (path) => path[path.length - 1] === '/' ? path.substring(0, path.length - 1) : path,
     isZipMagic = (buf) => buf && buf.length >= 4 && buf[0] === 0x50 && buf[1] === 0x4b &&
         ((buf[2] === 0x03 && buf[3] === 0x04) || (buf[2] === 0x05 && buf[3] === 0x06) || (buf[2] === 0x07 && buf[3] === 0x08)),
@@ -264,9 +265,9 @@ const
     },
     Cheer = class {
         constructor ({config, contents}) {
-            this.config = config;
             this.contents = contents;
             this.service = contents.service;
+            this.config = applyServiceAuth(config, contents, contents.service);
         }
 
         prepare ({difference = true, extract = true}) {

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.23.1
+
+### Added
+
+- Shared `auth` on jobs and `env-cheerfully.json` `auth.<service>` map (job wins; env fills defaults). Legacy `elevenLabsApiKey` and top-level ElevenLabs `apiKey` still map into `auth.apiKey`.
+
 ## 1.23.0
 
 - Provider umbrellas: `translate` (`amazon` default → `amazontranslate`, or `deepl` / `google` / `microsoft`), `lipsync` (`rhubarb` default / `allosaurus`), and `voiceover` (`elevenlabs` default / `polly`) resolve to Cheerfully concrete services before Yap submit.

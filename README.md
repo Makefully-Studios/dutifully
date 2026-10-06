@@ -6,16 +6,27 @@ Client API for Cheerfully services. Cheerfully makes voice-over easy.
 npm install @makefully/dutifully
 ```
 
-To use the API, you will need to specify a root `./env-cheerfully.json` file with the following format:
+To use the API, you will need a root `./env-cheerfully.json` with Showfully Yap credentials and optional per-service auth defaults:
 
 ```javascript
 {
     "server": "http://server:port",
-    "accessToken": "BearerTokenForShowfullyYap"
+    "accessToken": "BearerTokenForShowfullyYap",
+    "auth": {
+        "elevenlabs": { "apiKey": "…" },
+        "deepl": { "apiKey": "…", "serverUrl": "https://api-free.deepl.com" },
+        "googletranslate": { "apiKey": "…" },
+        "microsofttranslate": { "key": "…", "region": "eastus" },
+        "amazontranslate": { "config": { } },
+        "polly": { "config": { }, "bucket": "…", "root": "…" },
+        "transcription": { "config": { }, "bucket": "…", "root": "…" }
+    }
 }
 ```
 
 `accessToken` is sent as `Authorization: Bearer …` on yap submit/status/download (Showfully 1.4+). For local Showfully, use the same value as `SHOWFULLY_DEBUG_TOKEN` with `SHOWFULLY_ALLOW_DEBUG_TOKEN=1`.
+
+Job listings may include their own `auth` object (same shapes). Dutifully merges `auth.<service>` from env into each job; **job `auth` wins**. Legacy `elevenLabsApiKey` still maps to `auth.elevenlabs.apiKey`.
 
 ## Services
 
@@ -100,7 +111,7 @@ await cheerfully.say('The build is complete');
 ```
 
 
-Voice settings come from the first `elevenlabs` entry in `cheerfully.json` (same as other ElevenLabs chores). Server credentials and `elevenLabsApiKey` come from `env-cheerfully.json`. Cached files are keyed by voice + text, so repeats play immediately without regenerating.
+Voice settings come from the first `elevenlabs` entry in `cheerfully.json` (same as other ElevenLabs chores). Server credentials and optional `auth.elevenlabs` (or legacy `elevenLabsApiKey`) come from `env-cheerfully.json`. Cached files are keyed by voice + text, so repeats play immediately without regenerating.
 
 ### ElevenLabs
 
@@ -124,13 +135,19 @@ Specifying the `model` is optional: if unspecified, Cheerfully tries to look up 
 
 Specifying `updateAllMetaData` is `false` by default. If it's set to `true`, album, title, and unsynchronized lyrics are appended to any MP3's in the source directory that were not generated.
 
-You may include your ElevenLabs API Key directly in the ElevenLabs spec above as `apiKey`, or set your API Key separately in `env-cheerfully.json`:
+You may include credentials on the job as `auth.apiKey`, or set defaults in `env-cheerfully.json`:
 
 ```javascript
 {
-    "elevenLabsApiKey": "elevenlabsapikeyforyouraccount"
+    "auth": {
+        "elevenlabs": {
+            "apiKey": "elevenlabsapikeyforyouraccount"
+        }
+    }
 }
 ```
+
+Legacy `elevenLabsApiKey` at the top level of `env-cheerfully.json` is still accepted.
 
 ### FFMPEG
 
