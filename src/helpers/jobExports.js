@@ -28,6 +28,22 @@ const EXPORT_CATALOG = {
         keys: ['format', 'exports'],
         formats: TRANSLATE_FORMATS
     },
+    amazontranslate: {
+        keys: ['format', 'exports'],
+        formats: TRANSLATE_FORMATS
+    },
+    deepl: {
+        keys: ['format', 'exports'],
+        formats: TRANSLATE_FORMATS
+    },
+    googletranslate: {
+        keys: ['format', 'exports'],
+        formats: TRANSLATE_FORMATS
+    },
+    microsofttranslate: {
+        keys: ['format', 'exports'],
+        formats: TRANSLATE_FORMATS
+    },
     packfully: {
         keys: ['format', 'exports', 'exportFormat'],
         formats: PACKFULLY_FORMATS

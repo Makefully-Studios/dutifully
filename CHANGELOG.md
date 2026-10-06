@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 1.23.0
+
+- Provider umbrellas: `translate` (`amazon` default → `amazontranslate`, or `deepl` / `google` / `microsoft`), `lipsync` (`rhubarb` default / `allosaurus`), and `voiceover` (`elevenlabs` default / `polly`) resolve to Cheerfully concrete services before Yap submit.
+- Concrete MT parsers: `amazontranslate`, `deepl`, `googletranslate`, `microsofttranslate`.
+
 ## 1.22.1
 
 - Allow translate `format: "catalog"` (Cheerfully flat `{lang}.json` app catalogs) alongside existing loc formats.

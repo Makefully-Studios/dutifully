@@ -432,13 +432,22 @@ Script lines may also include an optional `events` array for one-shot timed mark
 
 Cheerfully resolves these against caption timings and exports them in parallel using the same caption `format` (`events.json`, `{id}.events.vtt` / `.srt` / `.sami` / `.smi` / `.lrc`, or a separate MP3 SYLT frame with content type `EVENTS` labeled `"events"`).
 
-### Translate
+### Provider umbrellas (`translate`, `lipsync`, `voiceover`)
 
-This text-to-text service translates Cheerfully scripts or language-matrix CSV/TSV via Amazon Translate. Set jobs in `cheerfully.json`:
+Dutifully logical services pick a Cheerfully processor via per-job `provider` (stripped before upload):
+
+| Dutifully `-service` | `provider` | Default | Cheerfully target |
+| --- | --- | --- | --- |
+| `translate` | `amazon`, `deepl`, `google`, `microsoft` | `amazon` | `amazontranslate`, `deepl`, `googletranslate`, `microsofttranslate` |
+| `lipsync` | `rhubarb`, `allosaurus` | `rhubarb` | same as provider |
+| `voiceover` | `polly`, `elevenlabs` | `elevenlabs` | same as provider |
+
+Concrete keys (`deepl`, `polly`, `rhubarb`, …) still work without `provider`.
 
 ```javascript
 {
     "translate": [{
+        "provider": "amazon",
         "script": "./example/script.json",
         "language": "en-US",
         "languages": ["es-ES", "fr-FR"],
@@ -449,15 +458,29 @@ This text-to-text service translates Cheerfully scripts or language-matrix CSV/T
         "language": "en-US",
         "languages": ["es-ES", "fr-FR"],
         "output": "./example/scripts/"
+    }],
+    "voiceover": [{
+        "provider": "elevenlabs",
+        "script": "./example/script.json",
+        "output": "./example/vo/en/",
+        "voice": "21m00Tcm4TlvDq8ikWAM"
+    }],
+    "lipsync": [{
+        "provider": "rhubarb",
+        "src": "./example/vo/en/",
+        "output": "./example/lipsync/en/"
     }]
 }
 ```
+
+Translate job fields:
 
 * `script` — path to a Cheerfully `.json` script or a language-matrix `.csv` / `.tsv` (first column = ids, first row = language tags).
 * `language` — source locale (CSV: source column). Matrix jobs require this; JSON may use `auto`.
 * `languages` — target locales to produce or fill.
 * `format` / `exports` — optional. Defaults to the source extension (`json`, `csv`, or `tsv`).
 * `ignore` — phrases left untranslated.
+* `provider` — MT engine (see table); default `amazon`.
 
 JSON sources write `{lang}/{basename}.{ext}` under `output` (`catalog` → `{lang}.json`). CSV/TSV sources write an updated matrix file and leave existing non-empty cells unchanged.
 

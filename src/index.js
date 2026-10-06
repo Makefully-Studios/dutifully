@@ -2,11 +2,16 @@
 /* global console, process, require */
 const
     LipSync = require('./classes/LipSync'),
+    Translate = require('./classes/Translate'),
     parsers = {
         allosaurus: LipSync,
+        amazontranslate: Translate,
         classfully: require('./classes/Classfully'),
+        deepl: Translate,
         elevenlabs: require('./classes/ElevenLabs'),
         ffmpeg: require('./classes/FFMPEG'),
+        googletranslate: Translate,
+        microsofttranslate: Translate,
         packfully: require('./classes/Packfully'),
         polly: require('./classes/Polly'),
         rasterize: require('./classes/Rasterize'),
@@ -14,10 +19,12 @@ const
         sharp: require('./classes/Sharp'),
         stackfully: require('./classes/Stackfully'),
         transcription: require('./classes/Transcription'),
-        translate: require('./classes/Translate')
+        // Concrete only — umbrellas (translate / lipsync / voiceover) resolve first.
+        translate: Translate
     },
     getJSON = require('./helpers/getJSON'),
     {normalizeOnly, filterJobsById} = require('./helpers/filterJobs'),
+    {isUmbrella, resolveProviderService} = require('./helpers/resolveProviderService'),
     send = async function (contents) {
         const
             {id, service} = contents,
@@ -36,11 +43,40 @@ const
                 continue;
             }
 
+            let
+                cheerfullyService = service,
+                jobConfig = config;
+
+            if (isUmbrella(service)) {
+                try {
+                    const
+                        resolved = resolveProviderService(service, config);
+
+                    cheerfullyService = resolved.cheerfullyService;
+                    jobConfig = resolved.job;
+                } catch (e) {
+                    console.warn(e.message);
+                    continue;
+                }
+            }
+
             const
-                serviceHandler = new parsers[service]({config, contents});
+                Parser = parsers[cheerfullyService];
+
+            if (!Parser) {
+                console.warn(`No Dutifully parser for Cheerfully service "${cheerfullyService}".`);
+                continue;
+            }
+
+            const
+                contentsForJob = {
+                    ...contents,
+                    service: cheerfullyService
+                },
+                serviceHandler = new Parser({config: jobConfig, contents: contentsForJob});
 
             try {
-                await serviceHandler.prepare({...contents, ...config});
+                await serviceHandler.prepare({...contentsForJob, ...jobConfig});
             } catch (e) {
                 console.warn(e.message);
                 continue;
@@ -48,10 +84,10 @@ const
 
             try {
                 await serviceHandler.send({
-                    instanceId: `${id}-${service}${length > 1 ? `-${index}` : ''}`
+                    instanceId: `${id}-${cheerfullyService}${length > 1 ? `-${index}` : ''}`
                 });
             } catch (e) {
-                console.warn(`Error running "${service}" (${index}): ${e.message || e}`);
+                console.warn(`Error running "${cheerfullyService}" (${index}): ${e.message || e}`);
             }
         }
     };
