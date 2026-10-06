@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 1.22.1
+
+- Allow translate `format: "catalog"` (Cheerfully flat `{lang}.json` app catalogs) alongside existing loc formats.
+
 ## 1.22.0
 
 - Select a subset of service listings via optional job `id` and top-level `only` (`cheer -service packfully -only heroes,ui`).

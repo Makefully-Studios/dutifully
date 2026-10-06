@@ -6,7 +6,7 @@
 const LYRIC_FORMATS = ['json', 'lrc', 'mp3', 'sami', 'smi', 'srt', 'vtt', 'tsv', 'xml', 'dat'];
 const TRANSCRIPTION_FORMATS = ['json', 'lrc', 'mp3', 'sami', 'smi', 'srt', 'vtt'];
 const PACKFULLY_FORMATS = ['texturepacker', 'json-array', 'createjs', 'spine', 'css', 'starling', 'unity', 'godot'];
-const TRANSLATE_FORMATS = ['json', 'i18n', 'po', 'xliff', 'properties', 'yml', 'yaml', 'strings', 'xml', 'csv', 'tsv'];
+const TRANSLATE_FORMATS = ['json', 'i18n', 'catalog', 'po', 'xliff', 'properties', 'yml', 'yaml', 'strings', 'xml', 'csv', 'tsv'];
 
 const EXPORT_CATALOG = {
     transcription: {

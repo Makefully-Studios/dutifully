@@ -459,9 +459,11 @@ This text-to-text service translates Cheerfully scripts or language-matrix CSV/T
 * `format` / `exports` — optional. Defaults to the source extension (`json`, `csv`, or `tsv`).
 * `ignore` — phrases left untranslated.
 
-JSON sources write `{lang}/{basename}.{ext}` under `output`. CSV/TSV sources write an updated matrix file and leave existing non-empty cells unchanged.
+JSON sources write `{lang}/{basename}.{ext}` under `output` (`catalog` → `{lang}.json`). CSV/TSV sources write an updated matrix file and leave existing non-empty cells unchanged.
 
-Supported formats: `json`, `i18n`, `csv`, `tsv`, `po`, `xliff`, `properties`, `yml` / `yaml`, `strings`, `xml`.
+Supported formats: `json`, `i18n`, `catalog`, `csv`, `tsv`, `po`, `xliff`, `properties`, `yml` / `yaml`, `strings`, `xml`.
+
+`catalog` writes flat key → caption JSON as `{lang}.json` (app localization layout). `i18n` uses the same payload under `{lang}/{basename}.i18n.json`.
 
 ## Example
 
