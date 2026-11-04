@@ -6,6 +6,8 @@ Client API for Cheerfully services. Cheerfully makes voice-over easy.
 npm install @makefully/dutifully
 ```
 
+Requires **Node.js 22+** (for `music-metadata` WebM reads).
+
 To use the API, you will need a root `./env-cheerfully.json` with Showfully Yap credentials and optional per-service auth defaults:
 
 ```javascript
@@ -133,7 +135,9 @@ You may set a single `voice` value to an ElevenLabs voice id, or an object of sp
 
 Specifying the `model` is optional: if unspecified, Cheerfully tries to look up the voice id and pick a good model; if lookup fails it falls back to `eleven_multilingual_v2`.
 
-Specifying `updateAllMetaData` is `false` by default. If it's set to `true`, album, title, and unsynchronized lyrics are appended to any MP3's in the source directory that were not generated.
+Specifying `updateAllMetaData` is `false` by default. If it's set to `true`, album, title, and unsynchronized lyrics are applied to any present VO files that were not regenerated, via Cheerfully’s `metadata` service (works for `.mp3` and `.webm`; falls back to local ID3 for MP3 if the service is unavailable).
+
+Newly generated VO is tagged on the server (`updateMediaMeta`) using `album` and per-file `generationHashes` from the Dutifully job. WebM is **read-only** on Dutifully (`music-metadata`); all WebM writes go through Cheerfully.
 
 You may include credentials on the job as `auth.apiKey`, or set defaults in `env-cheerfully.json`:
 
@@ -148,6 +152,10 @@ You may include credentials on the job as `auth.apiKey`, or set defaults in `env
 ```
 
 Legacy `elevenLabsApiKey` at the top level of `env-cheerfully.json` is still accepted.
+
+### Metadata
+
+Tag-only Cheerfully chore (`service: "metadata"`). Upload media plus a `metadata.json` payload of per-file tags (same schema as Cheerfully’s metadata service). Dutifully’s `Metadata` parser mirrors this for `updateAllMetaData` and ad-hoc retags.
 
 ### FFMPEG
 
@@ -322,7 +330,7 @@ This text-to-voice service requires a script as input and will download audio VO
 
 You may set a single `voice` value matching an available AMazon Polly voice or this may be an object of key/value pairs with speaker name keys matched to voices. The speaker names must match speakers listed in the script. If "default" is provided as a key, this voice will be used for any scripts not specifying a speaker.
 
-Specifying `updateAllMetaData` is `false` by default. If it's set to `true`, album, title, and unsynchronized lyrics are appended to any MP3's in the source directory that were not generated.
+Specifying `updateAllMetaData` is `false` by default. If it's set to `true`, present VO files are retagged via Cheerfully’s `metadata` service (same behavior as ElevenLabs).
 
 ### Allosaurus
 
@@ -341,7 +349,7 @@ This audio-to-lip-flap service requires audio as input and will download a mouth
 }
 ```
 
-Export formats include those supported by Rhubarb as well as `mp3`, which embeds lipsync timings into the MP3's ID3 metadata.
+Export formats include those supported by Rhubarb as well as `mp3` / `webm`, which embed lipsync timings into the source audio (ID3 SYLT or WebVTT track).
 
 Set `exportFormat`, `exports`, or omit/`null` for export selection:
 
@@ -383,7 +391,7 @@ This audio-to-lip-flap service requires audio as input and will download a mouth
 }
 ```
 
-Export formats include those supported by Rhubarb as well as `mp3`, which embeds lipsync timings into the MP3's ID3 metadata.
+Export formats include those supported by Rhubarb as well as `mp3` / `webm`, which embed lipsync timings into the source audio (ID3 SYLT or WebVTT track).
 
 Use `exportFormat`, `exports`, or omit/`null` with the same string | array | all semantics as Rhubarb (see Allosaurus above).
 
@@ -413,6 +421,7 @@ Transcription supports the following formats:
 * JSON
 * LRC
 * MP3 (Embedded in source MP3 as a SYLT ID3 tag labeled "captions".)
+* WebM (Embedded WebVTT track titled `captions` / `words`. Accepts `.webm` / `.weba` sources; embeds keep the source extension. Dutifully reads via `music-metadata`; embedding is server-side.)
 * SAMI / SMI
 * SRT
 * VTT

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 1.24.0
+
+### Added
+
+- WebM export format mirror for lipsync / transcription (`webm` beside `mp3`); `.weba` is an accepted alias that preserves the `.weba` filename on embed; read-only `WebM.js` via `music-metadata@^11`.
+- TTS jobs send `album` + `generationHashes` for Cheerfully server-side metadata stamping; drop post-download ID3 hash writes for newly generated VO.
+- `Metadata` Cheerfully client + `updateAllMetaData` via the `metadata` service (MP3 local ID3 fallback).
+- Require Node `>=22` (for `music-metadata` ESM).
+
 ## 1.23.1
 
 ### Added

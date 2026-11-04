@@ -11,6 +11,7 @@ const
         elevenlabs: require('./classes/ElevenLabs'),
         ffmpeg: require('./classes/FFMPEG'),
         googletranslate: Translate,
+        metadata: require('./classes/Metadata'),
         microsofttranslate: Translate,
         packfully: require('./classes/Packfully'),
         polly: require('./classes/Polly'),

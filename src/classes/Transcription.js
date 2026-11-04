@@ -10,9 +10,11 @@ const
     SEPARATE_CHARACTER = '|',
     JOIN_CHARACTER = '^',
     filter = (fileType, file) => (file.indexOf('.') !== 0) && (file.slice(-(fileType.length + 1)) === `.${fileType}`),
+    AUDIO_SRC_EXTS = ['mp3', 'webm', 'weba'],
+    stripExt = (file) => file.replace(/\.[^.]+$/, ''),
     mapReduction = (map, list) => list.reduce((obj, file) => {
         const
-            id = file.substring(0, file.length - 4);
+            id = stripExt(file);
 
         obj[id] = map[id];
         return obj;
@@ -141,6 +143,10 @@ const
                                 if (fileType !== 'json') {
                                     await fs.rm(`${output}${caption}.${fileType}`, {force: true});
                                     await fs.rm(`${output}${caption}.events.${fileType}`, {force: true});
+
+                                    if (fileType === 'webm') {
+                                        await fs.rm(`${output}${caption}.weba`, {force: true});
+                                    }
                                 }
                             }
                         }
@@ -178,13 +184,19 @@ const
 
                     return staleIds.size;
                 },
-                list = (await readdirOrEmpty(src)).filter(filter.bind(null, 'mp3')).filter((file) => {
+                list = [];
+
+            for (const ext of AUDIO_SRC_EXTS) {
+                for (const file of (await readdirOrEmpty(src)).filter(filter.bind(null, ext))) {
                     const
-                        id = file.substring(0, file.length - 4),
+                        id = stripExt(file),
                         caption = files?.[id];
 
-                    return !check(id, caption);
-                });
+                    if (!check(id, caption)) {
+                        list.push(file);
+                    }
+                }
+            }
 
             if (exportFormats.length === 1) {
                 config.format = exportFormats[0];
@@ -213,10 +225,10 @@ const
                 const
                     fileType = exportFormats[i];
 
-                if (fileType !== 'json' && fileType !== 'mp3') {
+                if (fileType !== 'json' && fileType !== 'mp3' && fileType !== 'webm') {
                     for (let j = 0; j < list.length; j++) {
                         const
-                            id = list[j].substring(0, list[j].length - 4);
+                            id = stripExt(list[j]);
 
                         await fs.rm(`${output}${id}.events.${fileType}`, {force: true});
                     }
@@ -258,7 +270,14 @@ const
                 for (let j = 0; j < updateList.length; j++) {
                     const
                         filename = updateList[j],
-                        id = filename.substring(0, filename.length - 4),
+                        id = stripExt(filename);
+
+                    // WebM hashes are stamped server-side (read-only client format).
+                    if (formatId === 'webm') {
+                        continue;
+                    }
+
+                    const
                         file = await getFileData(`${output}${id}.${formatId}`, formatId);
 
                     file.addHash(transcripts[id].getHash());

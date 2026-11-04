@@ -1,5 +1,6 @@
 const
     Cheer = require('./Cheer'),
+    Metadata = require('./Metadata'),
     Transcript = require('./Transcript'),
     fs = require('fs').promises,
     getFileData = require('../helpers/getFileData'),
@@ -143,6 +144,15 @@ const
             this.config.files = standardizedFiles;
             this.transcripts = transcripts;
 
+            // Server-side metadata stamping (Cheerfully updateMediaMeta).
+            this.config.album = this.album;
+            this.config.generationHashes = Object.keys(transcripts).reduce((map, id) => {
+                map[id] = transcripts[id].getHash({
+                    seed: this.encodedBy ?? ''
+                });
+                return map;
+            }, {});
+
             return super.prepare(data);
         }
 
@@ -171,11 +181,12 @@ const
             }
     
             if (updateAllMetaData && present.length) {
-                await appendMP3Meta({
+                await this.updatePresentMeta({
                     album,
                     captions: mapReduction(files, present),
                     language,
-                    output
+                    output,
+                    present
                 });
             }
     
@@ -186,10 +197,64 @@ const
             this.updateList = missing;
         }
 
+        /**
+         * Retag existing VO via Cheerfully `metadata` service (mp3 / webm).
+         * Falls back to local ID3 writes if the metadata chore fails.
+         */
+        async updatePresentMeta ({album, captions, language, output, present}) {
+            const
+                {contents} = this,
+                tagFiles = {},
+                mediaFiles = present.map((filename) => {
+                    const
+                        id = filename.substring(0, filename.lastIndexOf('.')),
+                        text = captionText(captions[id]);
+
+                    tagFiles[filename] = {
+                        album,
+                        title: clamp(text, 40),
+                        lyrics: text,
+                        language
+                    };
+
+                    return {
+                        path: `${output}${filename}`,
+                        name: filename
+                    };
+                });
+
+            try {
+                const
+                    job = new Metadata({
+                        config: {files: tagFiles},
+                        contents: {
+                            ...contents,
+                            service: 'metadata',
+                            output,
+                            extract: true
+                        },
+                        mediaFiles
+                    });
+
+                await job.send({instanceId: `${contents.id || 'tts'}-metadata`});
+                present.forEach((filename) => {
+                    console.log(`Voice meta data updated for "${filename.substring(0, filename.lastIndexOf('.'))}".`);
+                });
+            } catch (e) {
+                console.warn(`metadata service failed (${e.message || e}); falling back to local MP3 ID3 writes.`);
+                await appendMP3Meta({
+                    album,
+                    captions,
+                    language,
+                    output
+                });
+            }
+        }
+
         async afterExport (...args) {
             const
-                {album, encodedBy, config, transcripts, updateList} = this,
-                {files, output, language, voice} = config,
+                {config, updateList} = this,
+                {files, output} = config,
                 list = updateList ?? Object.keys(files).map((id) => `${id}.mp3`),
                 missing = [];
 
@@ -222,27 +287,10 @@ const
                 );
             }
 
-            await appendMP3Meta({
-                album,
-                captions: files,
-                generated: true,
-                language,
-                output,
-                voice
+            // Album / title / lyrics / GenerationHash are stamped server-side via updateMediaMeta.
+            list.forEach((filename) => {
+                console.log(`Voice generated for "${filename.substring(0, filename.lastIndexOf('.'))}".`);
             });
-            for (let i = 0; i < list.length; i++) {
-                const
-                    filename = list[i],
-                    id = filename.substring(0, filename.length - 4),
-                    file = await getFileData(`${output}${filename}`, 'mp3');
-
-                file.addHash(transcripts[id].getHash({
-                    seed: encodedBy ?? ''
-                }), {
-                    hashKey: 'GenerationHash'
-                });
-                await file.save();
-            }
             super.afterExport(...args);
         }
     };

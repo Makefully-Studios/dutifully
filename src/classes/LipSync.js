@@ -2,10 +2,32 @@ const
     Cheer = require('./Cheer'),
     fs = require('fs').promises,
     getJSON = require('../helpers/getJSON'),
-    {resolveJobExports} = require('../helpers/jobExports'),
+    {resolveJobExports, isWebMExt} = require('../helpers/jobExports'),
     {ensureDir, ensureParentDir, readdirOrEmpty} = require('../helpers/dirs'),
     id3 = require('node-id3').Promise,
-    filter = (fileType, file) => (file.indexOf('.') !== 0) && (file.slice(-(fileType.length + 1)) === `.${fileType}`),
+    getFileData = require('../helpers/getFileData'),
+    fileExt = (file) => {
+        const
+            i = file.lastIndexOf('.');
+
+        return i >= 0 ? file.slice(i + 1).toLowerCase() : '';
+    },
+    filter = (fileType, file) => {
+        if (file.indexOf('.') === 0) {
+            return false;
+        }
+
+        const
+            ext = fileExt(file);
+
+        if (fileType === 'webm') {
+            return isWebMExt(ext);
+        }
+
+        return ext === fileType;
+    },
+    AUDIO_SRC_EXTS = ['mp3', 'webm', 'weba'],
+    stripExt = (file) => file.replace(/\.[^.]+$/, ''),
     combine = async (path, fileType) => {
         const
             files = (await readdirOrEmpty(path)).filter(filter.bind(null, fileType)),
@@ -13,7 +35,8 @@ const
         
         for (let i = 0; i < files.length; i++) {
             const
-                file = files[i];
+                file = files[i],
+                ext = fileExt(file);
 
             if (fileType === 'mp3') {
                 const
@@ -24,11 +47,22 @@ const
                         index = synchronisedLyrics.map(({shortText}) => shortText).indexOf('lipsync');
 
                     if (index >= 0) {
-                        list.push(file.substring(0, file.length - fileType.length - 1));
+                        list.push(stripExt(file));
                     }
                 }
+            } else if (fileType === 'webm' || isWebMExt(ext)) {
+                try {
+                    const
+                        webm = await getFileData(`${path}${file}`, ext);
+
+                    if (webm.hasTimedTrack('lipsync')) {
+                        list.push(stripExt(file));
+                    }
+                } catch (e) {
+                    // ignore unreadable webm/weba
+                }
             } else {
-                list.push(file.substring(0, file.length - fileType.length - 1));
+                list.push(stripExt(file));
             }
         }
 
@@ -40,7 +74,7 @@ const
     }, {}),
     mapReduction = (map, list) => list.reduce((obj, file) => {
         const
-            id = file.substring(0, file.length - 4);
+            id = stripExt(file);
 
         obj[id] = map[id];
         return obj;
@@ -145,6 +179,10 @@ const
 
                             if (formatId !== 'json') {
                                 await fs.rm(`${output}${key}.${formatId}`, {force: true});
+
+                                if (formatId === 'webm') {
+                                    await fs.rm(`${output}${key}.weba`, {force: true});
+                                }
                             }
                         }
 
@@ -163,12 +201,14 @@ const
                 },
                 list = [];
 
-            for (const fileName of (await readdirOrEmpty(src)).filter(filter.bind(null, 'mp3'))) {
-                const
-                    id = fileName.substring(0, fileName.length - 4);
+            for (const ext of AUDIO_SRC_EXTS) {
+                for (const fileName of (await readdirOrEmpty(src)).filter(filter.bind(null, ext))) {
+                    const
+                        id = stripExt(fileName);
 
-                if (!(await isCurrent(id))) {
-                    list.push(fileName);
+                    if (!(await isCurrent(id))) {
+                        list.push(fileName);
+                    }
                 }
             }
 

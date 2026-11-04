@@ -1,6 +1,6 @@
 {
     "name": "@makefully/dutifully",
-    "version": "1.23.1",
+    "version": "1.24.0",
     "description": "Client tools for Cheerfully service.",
     "main": "./src/index.js",
     "bin": {
@@ -66,10 +66,11 @@
         "access": "public"
     },
     "engines": {
-        "node": ">=18"
+        "node": ">=22"
     },
     "dependencies": {
         "archiver": "^7.0.1",
+        "music-metadata": "^11.16.1",
         "node-id3": "^0.2.6",
         "node-web-audio-api": "^2.0.0",
         "png-chunk-text": "^1.0.0",

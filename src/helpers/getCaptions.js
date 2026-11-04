@@ -1,18 +1,36 @@
 const
     getFileData = require("./getFileData"),
     {readdirOrEmpty} = require("./dirs"),
-    filter = (fileType, file) => {
+    {isWebMExt} = require("./jobExports"),
+    fileExt = (file) => {
+        const
+            i = file.lastIndexOf('.');
+
+        return i >= 0 ? file.slice(i + 1).toLowerCase() : '';
+    },
+    matchesType = (fileType, file) => {
         if (file.indexOf('.') === 0) {
             return false;
         }
 
-        if (file.slice(-(fileType.length + 1)) !== `.${fileType}`) {
+        const
+            ext = fileExt(file);
+
+        if (fileType === 'webm') {
+            return isWebMExt(ext);
+        }
+
+        return ext === fileType;
+    },
+    filter = (fileType, file) => {
+        if (!matchesType(fileType, file)) {
             return false;
         }
 
         // Parallel event exports are `{id}.events.{format}` — not caption tracks.
         const
-            base = file.slice(0, -(fileType.length + 1));
+            ext = fileExt(file),
+            base = file.slice(0, -(ext.length + 1));
 
         return !base.endsWith('.events');
     };
@@ -47,8 +65,9 @@ module.exports = async (path, fileType) => {
         for (let i = 0; i < files.length; i++) {
             const
                 filename = files[i],
-                file = await getFileData(`${path}${filename}`, fileType),
-                key = filename.substring(0, filename.length - fileType.length - 1);
+                ext = fileExt(filename),
+                file = await getFileData(`${path}${filename}`, ext),
+                key = filename.substring(0, filename.length - ext.length - 1);
                 
             captions[key] = file.toString();
             fileMap[key] = file;
