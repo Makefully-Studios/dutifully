@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.25.0
+
+### Added
+
+- Document Stackfully layer **buffer ops** vs **composite props** (`recolor`, `tint`, `greyscale`/`grayscale`, resize via `width`/`height`/`fit`, `rotate`) matching Cheerfully 2.3.0’s `LAYER_BUFFER_OPS` registry.
+
 ## 1.24.0
 
 ### Added

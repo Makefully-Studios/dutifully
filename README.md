@@ -276,7 +276,12 @@ Unchanged outputs are skipped using embedded `CheerfullySharpHash` metadata (PNG
 
 ### Stackfully
 
-This multi-layer compositing service builds sized outputs from ordered image layers (positioning, blend, alpha). Every image under `src` is available as a layer source; define composites under `outputs`.
+This multi-layer compositing service builds sized outputs from ordered image layers. Every image under `src` is available as a layer source; define composites under `outputs`.
+
+Layer objects mix two concerns:
+
+* **Buffer ops** (source transforms, applied in order before placement): `width` / `height` / `fit` (resize), `rotate` (degrees), `tint` (Sharp LAB chroma tint — strong on midtones), `recolor` (RGB multiply colourization for white/grey artwork; alpha preserved — prefer for icons/fills), `greyscale` / `grayscale`. New buffer ops are added on the Cheerfully worker’s `LAYER_BUFFER_OPS` registry.
+* **Composite props** (placement / blend): `blend`, `alpha`, `top` / `left` / `right` / `bottom`, `x` / `y`, and `composite: true` for generated sources.
 
 ```javascript
 {
@@ -297,11 +302,14 @@ This multi-layer compositing service builds sized outputs from ordered image lay
                 "layers": [
                     "background.png",
                     {
-                        "input": "foreground.png",
+                        "input": "icon-white.png",
+                        "recolor": "#e95646",
                         "alpha": 0.85,
                         "blend": "over",
                         "bottom": 0,
-                        "right": 0
+                        "right": 0,
+                        "width": 600,
+                        "height": 600
                     }
                 ]
             }
