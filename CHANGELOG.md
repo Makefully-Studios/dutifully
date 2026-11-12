@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.25.1
+
+### Added
+
+- Automatic GitHub Releases on `package.json` version bumps (via the Release workflow).
+
 ## 1.25.0
 
 ### Added
